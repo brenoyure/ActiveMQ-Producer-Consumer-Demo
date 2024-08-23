@@ -1,0 +1,52 @@
+services:
+  jms-producer:
+    image: br.albatross.otrs.messaging.producer.queue.email-i
+    container_name: br.albatross.otrs.messaging.producer.queue.email-c
+    build:
+      args:
+        - JMS_QUEUE_HOST=${JMS_QUEUE_HOST}
+        - JMS_QUEUE_PORT=${JMS_QUEUE_PORT}
+        - JMS_QUEUE_USERNAME=${JMS_QUEUE_USERNAME}
+        - JMS_QUEUE_PASSWORD=${JMS_QUEUE_PASSWORD}
+      context: ./jms-producer
+    depends_on:
+      jms-activemq:
+        condition: service_started
+    ports:
+      - 8081:8080
+    networks:
+      - messaging.activemq.network
+
+  jms-consumer:
+    image: br.albatross.otrs.messaging.consumer.queue.email-i
+    container_name: br.albatross.otrs.messaging.consumer.queue.email-c
+    build:
+      args:
+        - JMS_QUEUE_HOST=${JMS_QUEUE_HOST}
+        - JMS_QUEUE_PORT=${JMS_QUEUE_PORT}
+        - JMS_QUEUE_USERNAME=${JMS_QUEUE_USERNAME}
+        - JMS_QUEUE_PASSWORD=${JMS_QUEUE_PASSWORD}
+      context: ./jms-consumer
+    depends_on:
+      jms-producer:
+        condition: service_started
+      jms-activemq:
+        condition: service_started
+    ports:
+      - 8082:8080
+    networks:
+      - messaging.activemq.network
+
+  jms-activemq:
+    image: apache/activemq-artemis:latest-alpine
+    container_name: br.albatross.messaging.activemq-c
+    ports:
+      - 61616:61616
+      - 8161:8161
+    networks:
+      - messaging.activemq.network
+
+networks:
+  messaging.activemq.network:
+    name: br.albatross.messaging.activemq.network
+    driver: bridge

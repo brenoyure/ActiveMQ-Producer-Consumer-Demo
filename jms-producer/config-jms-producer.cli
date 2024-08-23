@@ -1,0 +1,19 @@
+embed-server --server-config=standalone-full.xml
+
+# Link da Documentação do Wildfly: https://docs.wildfly.org/33/Admin_Guide.html#Messaging_Connect_a_pooled-connection-factory_to_a_Remote_Artemis_Server
+
+# Configurando um remote-destination-outbout-socket-binding
+/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=my-jms-remote-socket-binding:add(host=${env.JMS_QUEUE_HOST}, port=${env.JMS_QUEUE_PORT})
+
+# Criando um Remote Connector e atribuindo-o ao socket-binding criado anteriormente
+/subsystem=messaging-activemq/remote-connector=my-remote-jms-connector:add(socket-binding=my-jms-remote-socket-binding)
+
+# Criando a ConnectionFactory e atribuindo-a o RemoteConnector criado
+/subsystem=messaging-activemq/pooled-connection-factory=my-remote-jms-pooled-connection-factory:add(connectors=[my-remote-jms-connector], entries=[java:/jms/MyRemoteJmsConnectionFactory], user=${env.JMS_QUEUE_USERNAME}, password=${env.JMS_QUEUE_PASSWORD})
+
+# Criando a fila JMS Remota com o JNDI java:/jboss/exported/jms/queue/OtrsEmailQueue
+/subsystem=messaging-activemq/external-jms-queue=OtrsEmailQueue:add(entries=[jms.queue.OtrsEmailQueue java:jboss/exported/jms/queue/OtrsEmailQueue]
+
+stop-embedded-server
+
+
