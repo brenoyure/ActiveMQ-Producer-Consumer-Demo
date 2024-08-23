@@ -17,9 +17,13 @@ public class HelloController {
     private MyJmsProducer jmsProducer;
 
     @GET
-    public Response sayHello(@QueryParam("message") String message) {
-        jmsProducer.send(message);
-        return Response.ok(message).build();
+    public Response sayHello(
+            @QueryParam("assunto") String assunto, 
+            @QueryParam("message") String message) {
+
+        jmsProducer.send(assunto, message);
+
+        return Response.ok("{'assunto': '" + assunto + "', 'mensagem': '" + message + "' }").build();
 
     }
 

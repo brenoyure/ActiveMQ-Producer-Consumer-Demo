@@ -20,14 +20,16 @@ public class MyJmsProducer {
     @Resource(lookup = "java:jboss/exported/jms/queue/OtrsEmailQueue")
     private Queue queue;
 
-    public void send(String message) {
+    public void send(String assunto, String message) {
+
         Email email = EmailFactoryBean.newInstance();
-        email.setAssunto("Enviando email para a fila JMS");
+        email.setAssunto(assunto);
         email.setCorpoDaMensagem(message);
         ObjectMessage emailJmsObjectMessage = context.createObjectMessage(email);
-        System.out.println(email.getAssunto());
-        System.out.println(message);
+        System.out.println("Produzindo a mensagem com o assunto: " + assunto);
+        System.out.println("Produzindo a mensagem com o texto: " + message);
         context.createProducer().send(queue, emailJmsObjectMessage);
+
     }
 
 }
